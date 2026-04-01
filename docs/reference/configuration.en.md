@@ -89,6 +89,34 @@ Index of all configuration keys available in SORK.
 | `manual_stop_pause` | bool | `1` | Pause after manual stop |
 | `container_audit_log` | bool | `0` | Enable audit for this service |
 
+#### Automatic Updates
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `auto_update` | bool | `0` | Enable automatic image update checking |
+| `auto_update_interval` | string | `86400` | Check interval (seconds, `hourly`, `daily`, `weekly`) |
+| `auto_update_strategy` | string | `immediate` | `immediate` (apply automatically) or `notify` (alert only) |
+
+#### Scheduled Backups
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `backup` | bool | `0` | Enable scheduled backups |
+| `backup_schedule` | string | `86400` | Backup interval (seconds, `hourly`, `daily`, `weekly`) |
+| `backup_target` | string | `local` | Target: `local`, `ftp`, `rsync`, `s3` |
+| `backup_retention` | int | `7` | Number of backups to keep |
+| `backup_ftp_host` | string | — | FTP host |
+| `backup_ftp_user` | string | — | FTP username |
+| `backup_ftp_pass` | string | — | FTP password |
+| `backup_ftp_path` | string | `/backups` | FTP remote path |
+| `backup_rsync_dest` | string | — | rsync destination |
+| `backup_rsync_pass` | string | — | rsync password |
+| `backup_rsync_opts` | string | `-az` | rsync options |
+| `backup_s3_bucket` | string | — | S3 bucket |
+| `backup_s3_prefix` | string | `/backups` | S3 prefix |
+| `backup_s3_endpoint` | string | — | S3 endpoint (MinIO, etc.) |
+| `backup_s3_region` | string | `us-east-1` | AWS region |
+
 #### Autoscale
 
 | Key | Type | Default | Description |
@@ -114,6 +142,40 @@ Index of all configuration keys available in SORK.
 |---|---|---|---|
 | `enabled` | bool | `0` | Enable Discord notifications |
 | `webhook_url` | string | — | Discord webhook URL |
+
+### [slack] Section
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `enabled` | bool | `0` | Enable Slack notifications |
+| `webhook_url` | string | — | Slack webhook URL |
+
+### [teams] Section
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `enabled` | bool | `0` | Enable Teams notifications |
+| `webhook_url` | string | — | Teams webhook URL |
+
+### [telegram] Section
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `enabled` | bool | `0` | Enable Telegram notifications |
+| `bot_token` | string | — | Telegram bot token |
+| `chat_id` | string | — | Telegram chat ID |
+
+### [smtp] Section
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `enabled` | bool | `0` | Enable email notifications |
+| `host` | string | — | SMTP server |
+| `port` | int | `587` | SMTP port |
+| `user` | string | — | SMTP username |
+| `pass` | string | — | SMTP password |
+| `from` | string | — | Sender address |
+| `to` | string | — | Recipient address(es) |
 
 ## Environment Variables
 

@@ -1,6 +1,6 @@
-# Discord Notifications
+# Notifications
 
-The `notify.sh` module sends Discord alerts via webhook. Each notification is a structured embed containing the diagnostic, cause, and corrective actions.
+The `notify.sh` module sends alerts across multiple channels (Discord, Slack, Teams, Telegram, SMTP). Each notification is a structured message containing the diagnostic, cause, and corrective actions.
 
 ---
 
@@ -159,12 +159,13 @@ Mechanisms to prevent notification flooding:
 | Unique recovery | Single message when service becomes healthy |
 | `manual_pause_notified` | Do not alert on every cycle for a manual pause |
 | `suspend_reconcile.notified` | Do not alert on every cycle for a suspension |
+| Log anomaly cooldown | 10 minutes between non-blocking log anomaly notifications per service |
 
 ---
 
 ## Notifications in the Web Console
 
-In parallel with Discord, the Python backend maintains a notification system:
+In parallel with external channels, the Python backend maintains a notification system:
 
 | Feature | Detail |
 |---|---|

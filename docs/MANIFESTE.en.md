@@ -129,6 +129,38 @@ Each non-reserved section defines a service. The section name becomes the servic
 | `manual_stop_pause`   | `1`     | If `1`, do not auto-restart after manual stop (exit codes 0, 137, 143) |
 | `container_audit_log` | `0`     | If `1`, record audit events for this service               |
 
+### Auto-Update Keys
+
+See also [modules/update.en.md](modules/update.en.md) for detailed auto-update documentation.
+
+| Key                       | Default      | Description                                         |
+|---------------------------|--------------|-----------------------------------------------------|
+| `auto_update`             | `0`          | Enable automatic image update checking: `1` or `true` |
+| `auto_update_interval`    | `86400`      | Interval between checks. Seconds, or: `hourly`, `daily`, `weekly` |
+| `auto_update_strategy`    | `immediate`  | Strategy: `immediate` (apply rollout automatically) or `notify` (alert only) |
+
+### Backup Keys
+
+See also [modules/backup.en.md](modules/backup.en.md) for detailed backup documentation.
+
+| Key                       | Default      | Description                                         |
+|---------------------------|--------------|-----------------------------------------------------|
+| `backup`                  | `0`          | Enable scheduled backups: `1` or `true`             |
+| `backup_schedule`         | `86400`      | Interval between backups. Seconds, or: `hourly`, `daily`, `weekly` |
+| `backup_target`           | `local`      | Backup target: `local`, `ftp`, `rsync`, `s3`        |
+| `backup_retention`        | `7`          | Number of backups to keep                           |
+| `backup_ftp_host`         | --           | FTP host                                            |
+| `backup_ftp_user`         | --           | FTP username                                        |
+| `backup_ftp_pass`         | --           | FTP password                                        |
+| `backup_ftp_path`         | `/backups`   | FTP remote path                                     |
+| `backup_rsync_dest`       | --           | rsync destination (e.g., `user@host:/backups`)      |
+| `backup_rsync_pass`       | --           | rsync password (optional)                           |
+| `backup_rsync_opts`       | `-az`        | rsync options                                       |
+| `backup_s3_bucket`        | --           | S3 bucket name                                      |
+| `backup_s3_prefix`        | `/backups`   | S3 object prefix                                    |
+| `backup_s3_endpoint`      | --           | S3 endpoint URL (for MinIO or S3-compatible)        |
+| `backup_s3_region`        | `us-east-1`  | AWS region                                          |
+
 ### Autoscale Keys
 
 See also [AUTOSCALE-PROXY.en.md](AUTOSCALE-PROXY.en.md) for detailed autoscale documentation.
@@ -150,7 +182,7 @@ See also [AUTOSCALE-PROXY.en.md](AUTOSCALE-PROXY.en.md) for detailed autoscale d
 
 ## notify.ini
 
-Notification configuration in INI format. Currently supports Discord only.
+Notification configuration in INI format. Supports Discord, Slack, Teams, Telegram, and SMTP.
 
 ### [discord] Section
 
@@ -159,15 +191,62 @@ Notification configuration in INI format. Currently supports Discord only.
 | `enabled`     | `0`     | Enable Discord notifications: `1` or `true`    |
 | `webhook_url` | --      | Discord webhook URL                            |
 
+### [slack] Section
+
+| Key           | Default | Description                                    |
+|---------------|---------|------------------------------------------------|
+| `enabled`     | `0`     | Enable Slack notifications: `1` or `true`      |
+| `webhook_url` | --      | Slack incoming webhook URL                     |
+
+### [teams] Section
+
+| Key           | Default | Description                                    |
+|---------------|---------|------------------------------------------------|
+| `enabled`     | `0`     | Enable Microsoft Teams notifications: `1` or `true` |
+| `webhook_url` | --      | Teams incoming webhook URL                     |
+
+### [telegram] Section
+
+| Key           | Default | Description                                    |
+|---------------|---------|------------------------------------------------|
+| `enabled`     | `0`     | Enable Telegram notifications: `1` or `true`   |
+| `bot_token`   | --      | Telegram bot token                             |
+| `chat_id`     | --      | Telegram chat ID                               |
+
+### [smtp] Section
+
+| Key           | Default | Description                                    |
+|---------------|---------|------------------------------------------------|
+| `enabled`     | `0`     | Enable email notifications: `1` or `true`      |
+| `host`        | --      | SMTP server host                               |
+| `port`        | `587`   | SMTP server port                               |
+| `user`        | --      | SMTP username                                  |
+| `pass`        | --      | SMTP password                                  |
+| `from`        | --      | Sender email address                           |
+| `to`          | --      | Recipient email address(es)                    |
+
 Example `etc/notify.ini`:
 
 ```ini
 [discord]
 enabled = 1
 webhook_url = https://discord.com/api/webhooks/XXX/YYY
+
+[slack]
+enabled = 0
+webhook_url = https://hooks.slack.com/services/XXX/YYY/ZZZ
+
+[teams]
+enabled = 0
+webhook_url = https://outlook.webhook.office.com/webhookb2/XXX/IncomingWebhook/YYY/ZZZ
+
+[telegram]
+enabled = 0
+bot_token = YOUR_BOT_TOKEN
+chat_id = YOUR_CHAT_ID
 ```
 
-Events sent to Discord include: health failures, repair actions, blue/green rollouts, orphan removal, manifest errors, autoscale events, and recovery notifications.
+Events sent to all enabled channels include: health failures, repair actions, blue/green rollouts, orphan removal, manifest errors, autoscale events, auto-update events, backup events, and recovery notifications.
 
 ## Complete Example
 
@@ -216,6 +295,12 @@ memory_soft_mb = 256
 memory_hard_mb = 512
 monitoring_types = health,memory,oom,logs,http_latency
 monitoring_http_latency_max_ms = 800
+auto_update = 1
+auto_update_interval = daily
+auto_update_strategy = immediate
+backup = 1
+backup_schedule = daily
+backup_retention = 7
 
 [web-scaled]
 image = myapp:latest

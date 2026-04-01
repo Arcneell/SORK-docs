@@ -1,21 +1,48 @@
 # Notification Configuration
 
-SORK sends Discord notifications for important events: outages, repairs, autoscaling, manifest errors, etc.
+SORK sends notifications across multiple channels for important events: outages, repairs, autoscaling, automatic updates, backups, manifest errors, etc.
+
+## Supported Channels
+
+| Channel | Webhook Type | Required Configuration |
+|---|---|---|
+| Discord | Webhook URL | `webhook_url` |
+| Slack | Incoming Webhook | `webhook_url` |
+| Microsoft Teams | Incoming Webhook | `webhook_url` |
+| Telegram | Bot API | `bot_token` + `chat_id` |
+| SMTP (email) | SMTP Server | `host`, `user`, `pass`, `from`, `to` |
 
 ## Configuration
 
-Edit `etc/notify.ini`:
+Edit `etc/notify.ini`. Each channel is an independent section; enable the ones you want:
 
 ```ini
 [discord]
 enabled = 1
 webhook_url = https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN
-```
 
-| Key | Description |
-|---|---|
-| `enabled` | `1` to enable, `0` to disable |
-| `webhook_url` | Full Discord webhook URL |
+[slack]
+enabled = 1
+webhook_url = https://hooks.slack.com/services/XXX/YYY/ZZZ
+
+[teams]
+enabled = 0
+webhook_url = https://outlook.webhook.office.com/webhookb2/XXX/IncomingWebhook/YYY/ZZZ
+
+[telegram]
+enabled = 0
+bot_token = YOUR_BOT_TOKEN
+chat_id = YOUR_CHAT_ID
+
+[smtp]
+enabled = 0
+host = smtp.example.com
+port = 587
+user = alerts@example.com
+pass = secret
+from = alerts@example.com
+to = admin@example.com
+```
 
 ### Creating a Discord Webhook
 
@@ -25,6 +52,26 @@ webhook_url = https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN
 4. Choose the destination channel
 5. Copy the webhook URL
 6. Paste it into `etc/notify.ini`
+
+### Creating a Slack Webhook
+
+1. Go to [api.slack.com/apps](https://api.slack.com/apps)
+2. Create an app or select an existing one
+3. **Incoming Webhooks** > enable > **Add New Webhook to Workspace**
+4. Choose the channel and copy the URL
+
+### Creating a Teams Webhook
+
+1. In Teams, open the target channel
+2. **...** > **Connectors** > **Incoming Webhook**
+3. Name the connector and copy the URL
+
+### Setting up a Telegram Bot
+
+1. Open [@BotFather](https://t.me/BotFather) on Telegram
+2. Send `/newbot` and follow the instructions
+3. Copy the bot token
+4. Send a message to the bot, then get your `chat_id` via `https://api.telegram.org/bot<TOKEN>/getUpdates`
 
 ## Notified Events
 
@@ -41,15 +88,22 @@ webhook_url = https://discord.com/api/webhooks/YOUR_ID/YOUR_TOKEN
 | Orphan removed | `warn` | Undeclared sork-* container removed |
 | Service restored | `ok` | A previously failing service is healthy again |
 | Proxy event | `info` / `warn` | Load balancer change |
+| Update available | `info` | New Docker image detected (notify mode) |
+| Update applied | `ok` | Automatic update applied successfully |
+| Update failed | `warn` | Update rollout failed |
+| Backup completed | `ok` | Scheduled backup succeeded |
+| Backup failed | `warn` | Backup creation failed |
+| Remote upload failed | `warn` | Remote target upload failed |
 
 ## Message Format
 
-Notifications are sent as **Discord embeds** with:
+Each channel receives an adapted format:
 
-- A title describing the event
-- A detailed description
-- A color code based on severity (green, orange, red)
-- The name of the affected service
+- **Discord**: rich embeds with title, description, severity color, structured fields
+- **Slack**: Slack blocks with sections and context
+- **Teams**: Adaptive Cards
+- **Telegram**: Markdown-formatted messages
+- **SMTP**: HTML email with title and details
 
 ### Reason Codes
 
@@ -72,6 +126,7 @@ Each notification includes a translated reason code:
 
 SORK avoids notification spam:
 
-- Certain incidents are marked `skip_discord` to avoid duplicates in tight loops
+- Certain incidents are marked to avoid duplicates in tight loops
 - Recovery notifications are sent only once per restoration
 - The `manifest_load_warn.notified` flag prevents repeated alerts for the same manifest error
+- Non-blocking log anomaly notifications have a 10-minute cooldown per service

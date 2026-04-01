@@ -212,8 +212,8 @@ Voir [Authentification](../configuration/authentication.md) pour les détails.
 |---|---|---|
 | `GET` | `/api/notifications/` | Lister les notifications |
 | `GET` | `/api/notifications/stream` | SSE : flux temps réel |
-| `POST` | `/api/notify/save` | Sauvegarder la config Discord |
-| `POST` | `/api/notify/test` | Envoyer un message test |
+| `POST` | `/api/notify/save` | Sauvegarder la config notifications (Discord, Slack, Teams, Telegram, SMTP) |
+| `POST` | `/api/notify/test` | Envoyer un message test sur tous les canaux activés |
 
 ---
 
@@ -279,10 +279,34 @@ Voir [Authentification](../configuration/authentication.md) pour les détails.
 
 ## Sauvegarde et restauration
 
+### Configuration SORK
+
 | Méthode | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/backup` | Télécharger une archive `.tar.gz` de toute la configuration SORK |
 | `POST` | `/api/restore` | Restaurer la configuration depuis une archive (body = fichier brut) |
+
+### Sauvegarde planifiée des volumes
+
+| Méthode | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/backup/status` | État des sauvegardes pour tous les services |
+| `POST` | `/api/backup/trigger/{name}` | Déclencher une sauvegarde immédiate |
+| `GET` | `/api/backup/list/{name}` | Lister les archives d'un service |
+| `GET` | `/api/backup/download/{name}/{filename}` | Télécharger une archive |
+| `POST` | `/api/backup/config/{name}` | Modifier la configuration backup d'un service |
+| `GET` | `/api/backup/defaults` | Template de configuration par défaut |
+
+---
+
+## Mise à jour automatique
+
+| Méthode | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/update/status` | État des mises à jour pour tous les services (enabled, interval, strategy, digest, update_available) |
+| `POST` | `/api/update/check/{name}` | Forcer une vérification immédiate (docker pull + comparaison digest) |
+| `POST` | `/api/update/apply/{name}` | Appliquer une mise à jour en attente (pull + rollout) |
+| `POST` | `/api/update/config/{name}` | Modifier la configuration auto-update d'un service |
 
 ---
 

@@ -77,7 +77,9 @@ plugins:
             Proxy & Load Balancer: Proxy & Load Balancer
             Audit: Audit
             Incidents: Incidents
-            Notifications Discord: Discord Notifications
+            Notifications: Notifications
+            Mise à jour automatique: Automatic Updates
+            Sauvegarde planifiée: Scheduled Backups
             Console Web: Web Console
             Présentation: Overview
             API REST: REST API
@@ -142,7 +144,9 @@ nav:
     - Proxy & Load Balancer: modules/proxy.md
     - Audit: modules/audit.md
     - Incidents: modules/incidents.md
-    - Notifications Discord: modules/notify.md
+    - Notifications: modules/notify.md
+    - Mise à jour automatique: modules/update.md
+    - Sauvegarde planifiée: modules/backup.md
   - Console Web:
     - Présentation: ui/overview.md
     - API REST: ui/api.md

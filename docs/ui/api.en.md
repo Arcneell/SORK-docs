@@ -212,8 +212,8 @@ See [Authentication](../configuration/authentication.en.md) for details.
 |---|---|---|
 | `GET` | `/api/notifications/` | List notifications |
 | `GET` | `/api/notifications/stream` | SSE: real-time stream |
-| `POST` | `/api/notify/save` | Save Discord config |
-| `POST` | `/api/notify/test` | Send a test message |
+| `POST` | `/api/notify/save` | Save notification config (Discord, Slack, Teams, Telegram, SMTP) |
+| `POST` | `/api/notify/test` | Send a test message to all enabled channels |
 
 ---
 
@@ -279,10 +279,34 @@ See [Authentication](../configuration/authentication.en.md) for details.
 
 ## Backup and Restore
 
+### SORK Configuration
+
 | Method | Endpoint | Description |
 |---|---|---|
 | `GET` | `/api/backup` | Download a `.tar.gz` archive of the full SORK configuration |
 | `POST` | `/api/restore` | Restore configuration from an archive (raw body) |
+
+### Scheduled Volume Backups
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/backup/status` | Backup status for all services |
+| `POST` | `/api/backup/trigger/{name}` | Trigger an immediate backup |
+| `GET` | `/api/backup/list/{name}` | List archives for a service |
+| `GET` | `/api/backup/download/{name}/{filename}` | Download an archive |
+| `POST` | `/api/backup/config/{name}` | Update backup configuration for a service |
+| `GET` | `/api/backup/defaults` | Default configuration template |
+
+---
+
+## Automatic Updates
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/update/status` | Update status for all services (enabled, interval, strategy, digest, update_available) |
+| `POST` | `/api/update/check/{name}` | Force an immediate check (docker pull + digest comparison) |
+| `POST` | `/api/update/apply/{name}` | Apply a pending update (pull + rollout) |
+| `POST` | `/api/update/config/{name}` | Update auto-update configuration for a service |
 
 ---
 

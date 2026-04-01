@@ -1,0 +1,154 @@
+site_name: SORK - Shell Orchestrator
+site_description: Orchestrateur Docker single-node en Bash — réconciliation, autoscale, blue/green, monitoring et console web
+site_url: https://arcneell.github.io/SORK-docs/
+repo_url: https://github.com/Arcneell/SORK
+repo_name: Arcneell/SORK
+
+theme:
+  name: material
+  logo: assets/sork-logo.svg
+  favicon: assets/sork-favicon.svg
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Mode sombre
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Mode clair
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.indexes
+    - navigation.path
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+    - content.tabs.link
+    - toc.follow
+
+plugins:
+  - search
+  - i18n:
+      docs_structure: suffix
+      languages:
+        - locale: fr
+          name: Français
+          default: true
+          build: true
+        - locale: en
+          name: English
+          build: true
+          nav_translations:
+            Accueil: Home
+            Démarrage: Getting Started
+            Installation: Installation
+            Premier lancement: Quick Start
+            Déploiement de la doc: Deploy Documentation
+            Architecture: Architecture
+            Vue d'ensemble: Overview
+            Boucle de réconciliation: Reconciliation Loop
+            Répertoire d'état: State Directory
+            Configuration: Configuration
+            Manifest (manifest.ini): Manifest (manifest.ini)
+            Authentification: Authentication
+            Notifications (notify.ini): Notifications (notify.ini)
+            Variables d'environnement: Environment Variables
+            Modules: Modules
+            Health Checks: Health Checks
+            Repair & Rollout: Repair & Rollout
+            Autoscale: Autoscale
+            Proxy & Load Balancer: Proxy & Load Balancer
+            Audit: Audit
+            Incidents: Incidents
+            Notifications Discord: Discord Notifications
+            Console Web: Web Console
+            Présentation: Overview
+            API REST: REST API
+            Frontend: Frontend
+            Référence: Reference
+            CLI: CLI
+            Configuration complète: Full Configuration
+            Fonctions internes: Internal Functions
+            Dépannage: Troubleshooting
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - tables
+  - attr_list
+  - md_in_html
+  - def_list
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/Arcneell/SORK
+
+copyright: Copyright &copy; 2025-2026 SORK Project
+
+nav:
+  - Accueil: index.md
+  - Démarrage:
+    - Installation: getting-started/installation.md
+    - Premier lancement: getting-started/quickstart.md
+    - Déploiement de la doc: getting-started/deploy.md
+  - Architecture:
+    - Vue d'ensemble: architecture/overview.md
+    - Boucle de réconciliation: architecture/reconciliation.md
+    - Répertoire d'état: architecture/state-directory.md
+  - Configuration:
+    - Manifest (manifest.ini): configuration/manifest.md
+    - Authentification: configuration/authentication.md
+    - Notifications (notify.ini): configuration/notifications.md
+    - Variables d'environnement: configuration/environment.md
+  - Modules:
+    - Health Checks: modules/health.md
+    - Repair & Rollout: modules/repair.md
+    - Autoscale: modules/autoscale.md
+    - Proxy & Load Balancer: modules/proxy.md
+    - Audit: modules/audit.md
+    - Incidents: modules/incidents.md
+    - Notifications Discord: modules/notify.md
+  - Console Web:
+    - Présentation: ui/overview.md
+    - API REST: ui/api.md
+    - Frontend: ui/frontend.md
+  - Référence:
+    - CLI: reference/cli.md
+    - Configuration complète: reference/configuration.md
+    - Fonctions internes: reference/functions.md
+    - Dépannage: reference/troubleshooting.md

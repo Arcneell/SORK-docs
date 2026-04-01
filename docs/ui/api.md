@@ -64,6 +64,7 @@ Voir [Authentification](../configuration/authentication.md) pour les détails.
 | `POST` | `/api/containers/create/preview` | Prévisualiser la commande `docker run` |
 | `POST` | `/api/containers/preflight` | Vérifications pré-création (ports, noms, volumes) |
 | `POST` | `/api/containers/pull` | Tirer une image : `{"image":"nginx:latest"}` |
+| `GET` | `/api/containers/available-ports` | Ports hôte disponibles (`count=3`) |
 | `POST` | `/api/containers/{name}/action` | Action : `{"action":"start\|stop\|restart\|remove\|kill\|pause\|unpause"}` |
 | `POST` | `/api/containers/{name}/exec` | Exécuter : `{"cmd":"ls -la /app"}` |
 | `POST` | `/api/containers/{name}/commit` | Committer : `{"repo":"myimage","tag":"v1"}` |
@@ -80,6 +81,7 @@ Voir [Authentification](../configuration/authentication.md) pour les détails.
 | `GET` | `/api/images/{id}/history` | Historique des layers |
 | `GET` | `/api/images/{id}/export` | Télécharger l'image en fichier `.tar` |
 | `GET` | `/api/images/search` | Recherche registry (`q=terme`) |
+| `GET` | `/api/images/metadata` | Métadonnées d'une image (`image=nginx:latest`) : ports, volumes, env. Supporte Docker Hub sans pull. |
 | `POST` | `/api/images/pull` | Tirer une image : `{"image":"nginx:latest"}` |
 | `POST` | `/api/images/build` | Construire une image : `{"dockerfile_content":"...","tag":"mon-image:v1","no_cache":false}` |
 | `POST` | `/api/images/import` | Importer depuis un `.tar` (body = fichier brut) |

@@ -28,7 +28,8 @@ La page d'accueil affiche :
 
 Gestion des ressources Docker organisée en sous-vues :
 
-- **Containers** : tableau avec filtres, actions en ligne, logs en modal
+- **Containers** : tableau avec filtres, actions en ligne, logs en modal, bouton d'accès à l'assistant de création
+- **Assistant de création** : wizard guidé en 6 étapes pour créer un groupe de conteneurs (sélection d'images Docker Hub avec recherche, configuration auto-remplie des ports/volumes/env depuis les métadonnées de l'image, réseau dédié ou existant, orchestrateur SORK avec health checks, autoscale complet avec proxy dédié)
 - **Images** : galerie avec pull, build, suppression
 - **Volumes** : liste avec taille et attachements
 - **Networks** : topologie des réseaux
@@ -81,6 +82,7 @@ Visionneuse centralisée :
 | `WizardModal` | Assistant multi-étapes |
 | `ArrayField` | Champ de formulaire pour les listes (ports, volumes, env) |
 | `ContainerWizard` | Formulaire complet de création de conteneur |
+| `ServiceAssistant` | Assistant guidé de création multi-conteneurs avec pré-remplissage automatique |
 
 ## Build de production
 

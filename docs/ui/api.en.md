@@ -64,6 +64,7 @@ See [Authentication](../configuration/authentication.en.md) for details.
 | `POST` | `/api/containers/create/preview` | Preview the `docker run` command |
 | `POST` | `/api/containers/preflight` | Pre-creation checks (ports, names, volumes) |
 | `POST` | `/api/containers/pull` | Pull an image: `{"image":"nginx:latest"}` |
+| `GET` | `/api/containers/available-ports` | Available host ports (`count=3`) |
 | `POST` | `/api/containers/{name}/action` | Action: `{"action":"start\|stop\|restart\|remove\|kill\|pause\|unpause"}` |
 | `POST` | `/api/containers/{name}/exec` | Execute: `{"cmd":"ls -la /app"}` |
 | `POST` | `/api/containers/{name}/commit` | Commit: `{"repo":"myimage","tag":"v1"}` |
@@ -80,6 +81,7 @@ See [Authentication](../configuration/authentication.en.md) for details.
 | `GET` | `/api/images/{id}/history` | Layer history |
 | `GET` | `/api/images/{id}/export` | Download the image as a `.tar` file |
 | `GET` | `/api/images/search` | Registry search (`q=term`) |
+| `GET` | `/api/images/metadata` | Image metadata (`image=nginx:latest`): ports, volumes, env. Supports Docker Hub without pull. |
 | `POST` | `/api/images/pull` | Pull an image: `{"image":"nginx:latest"}` |
 | `POST` | `/api/images/build` | Build an image: `{"dockerfile_content":"...","tag":"my-image:v1","no_cache":false}` |
 | `POST` | `/api/images/import` | Import from a `.tar` file (raw body) |

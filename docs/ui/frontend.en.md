@@ -28,7 +28,8 @@ The home page displays:
 
 Docker resource management organized in sub-views:
 
-- **Containers**: table with filters, inline actions, logs in modal
+- **Containers**: table with filters, inline actions, logs in modal, creation assistant access button
+- **Creation Assistant**: guided 6-step wizard to create a group of containers (Docker Hub image search, auto-filled ports/volumes/env from image metadata, dedicated or existing network, SORK orchestrator with health checks, full autoscale with dedicated proxy)
 - **Images**: gallery with pull, build, removal
 - **Volumes**: list with size and attachments
 - **Networks**: network topology
@@ -81,6 +82,7 @@ Centralized log viewer:
 | `WizardModal` | Multi-step assistant |
 | `ArrayField` | Form field for lists (ports, volumes, env) |
 | `ContainerWizard` | Complete container creation form |
+| `ServiceAssistant` | Guided multi-container creation assistant with automatic pre-filling |
 
 ## Production Build
 

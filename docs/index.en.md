@@ -1,7 +1,7 @@
 # SORK — Shell Orchestrator
 
 <p align="center">
-  <img src="assets/sork-logo.svg" alt="SORK Logo" width="100">
+  <img src="/SORK-docs/assets/sork-logo.svg" alt="SORK Logo" width="100">
 </p>
 
 <p align="center"><strong>Single-node Docker orchestrator in Bash</strong></p>

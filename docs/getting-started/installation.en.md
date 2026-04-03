@@ -152,25 +152,34 @@ sudo systemctl enable --now sork
 To update SORK to the latest version:
 
 ```bash
-# Pull the new image and re-run the installer
 docker run --rm ghcr.io/arcneell/sork:latest cat /opt/sork/install.sh | bash -s -- --with-systemd
 ```
 
-The systemd service will restart automatically. The UI will be recreated on the next reconciliation cycle.
+The script updates:
+
+- The **engine** (bin/sork, lib/) — always overwritten with the latest version
+- The **UI Docker image** — re-pulled automatically
+- The **systemd service** — restarted
+
+!!! warning "Configuration preserved"
+    The files `etc/manifest.ini` and `etc/notify.ini` are **never overwritten**. Your configuration is preserved. If a new version introduces new configuration keys, check the release notes to add them manually.
+
+The UI container will be recreated on the next reconciliation cycle with the new image.
 
 ## Web Console
 
-After installation, the web console is available at **http://127.0.0.1:18100**.
+After installation, the web console is available at **http://SERVER_IP:18100**.
 
 - Default login: `admin` / `admin` (password change forced on first login)
-- To expose on the LAN, change `publish` in the manifest:
+- By default, the UI listens on all interfaces (`0.0.0.0:18100`).
+- To restrict to local access only, change `publish` in the manifest:
 
 ```ini
 [sork-ui]
-publish = 0.0.0.0:18100:8080
+publish = 127.0.0.1:18100:8080
 ```
 
-Then increment `config_version` and wait for the next reconciliation cycle (or run `sork once`).
+Then increment `config_version` and run `sork once`.
 
 ---
 

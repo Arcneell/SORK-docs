@@ -2,26 +2,27 @@
 
 ## Installation rapide (recommandée)
 
-Installez SORK sur n'importe quel serveur Linux avec une seule commande :
+Installez SORK sur n'importe quel serveur Linux en deux étapes :
+
+**1. Authentification au registry SORK** (identifiants fournis avec votre licence) :
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Arcneell/SORK/master/scripts/install.sh | bash
+echo "VOTRE_TOKEN" | docker login ghcr.io -u Arcneell --password-stdin
 ```
 
-Avec le service systemd :
+**2. Installation :**
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Arcneell/SORK/master/scripts/install.sh | bash -s -- --with-systemd
+docker run --rm ghcr.io/arcneell/sork:latest cat /opt/sork/install.sh | bash -s -- --with-systemd
 ```
 
 ### Ce que fait le script
 
 1. Vérifie et installe Docker si absent
-2. Télécharge l'image SORK depuis le registry
-3. Extrait le moteur d'orchestration dans `/opt/sork/`
-4. Crée les fichiers de configuration par défaut
-5. Lance une première réconciliation (`sork once`)
-6. Installe le service systemd (si `--with-systemd`)
+2. Extrait le moteur d'orchestration dans `/opt/sork/`
+3. Crée les fichiers de configuration par défaut
+4. Lance une première réconciliation (`sork once`)
+5. Installe le service systemd (si `--with-systemd`)
 
 ### Prérequis
 
@@ -151,14 +152,8 @@ sudo systemctl enable --now sork
 Pour mettre à jour SORK vers la dernière version :
 
 ```bash
-# Pull la nouvelle image
-docker pull ghcr.io/arcneell/sork:latest
-
-# Réextraire le moteur
-install.sh --skip-pull
-
-# Ou en une commande
-install.sh
+# Pull la nouvelle image et relancer l'installation
+docker run --rm ghcr.io/arcneell/sork:latest cat /opt/sork/install.sh | bash -s -- --with-systemd
 ```
 
 Le service systemd redémarrera automatiquement. L'UI sera recréée au prochain cycle de réconciliation.

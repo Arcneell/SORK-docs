@@ -88,11 +88,17 @@ The script:
 
 ## Client-Side Installation
 
-On the end-user's server:
+The client authenticates to the registry then extracts and runs the installer from the image:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Arcneell/SORK/master/scripts/install.sh | bash -s -- --with-systemd
+# 1. Authenticate (token provided with the license)
+echo "CLIENT_TOKEN" | docker login ghcr.io -u Arcneell --password-stdin
+
+# 2. Install
+docker run --rm ghcr.io/arcneell/sork:latest cat /opt/sork/install.sh | bash -s -- --with-systemd
 ```
+
+The install script is embedded in the image — no access to the source code or GitHub repository is needed.
 
 See [Installation](installation.en.md) for all options.
 

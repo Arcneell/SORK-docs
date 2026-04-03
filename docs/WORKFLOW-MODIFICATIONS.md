@@ -222,7 +222,7 @@ refactor(backend): extract notification persistence to core module
 echo "GITHUB_TOKEN" | docker login ghcr.io -u Arcneell --password-stdin
 ```
 
-3. **Set the package visibility** after the first push: GitHub repo > Settings > Packages > `sork` > change to Public (or configure access for your users).
+3. **Configure package access** after the first push: GitHub repo > Settings > Packages > `sork`. The package is **private by default** — grant access to clients via a `read:packages` token.
 
 ### Build and publish
 
@@ -249,13 +249,17 @@ The build script:
 
 ### End-user installation
 
-On a fresh server, users run:
+On a fresh server, users authenticate then run the installer from the image:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Arcneell/SORK/master/scripts/install.sh | bash -s -- --with-systemd
+# 1. Login (token provided with the license)
+echo "CLIENT_TOKEN" | docker login ghcr.io -u Arcneell --password-stdin
+
+# 2. Install
+docker run --rm ghcr.io/arcneell/sork:latest cat /opt/sork/install.sh | bash -s -- --with-systemd
 ```
 
-This pulls the image, extracts the engine to `/opt/sork/`, creates configuration files, and starts the systemd service. The web console is then available at `http://<server-ip>:18100`.
+The install script is embedded in the image — no access to the GitHub repository is needed. It extracts the engine to `/opt/sork/`, creates configuration files, and starts the systemd service. The web console is then available at `http://<server-ip>:18100`.
 
 See [Installation](getting-started/installation.md) for all options.
 

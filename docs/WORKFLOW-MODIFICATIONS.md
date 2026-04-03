@@ -263,12 +263,25 @@ The install script is embedded in the image — no access to the GitHub reposito
 
 See [Installation](getting-started/installation.md) for all options.
 
+### Versioning (Semantic Versioning)
+
+SORK follows [Semantic Versioning](https://semver.org/): `MAJOR.MINOR.PATCH`.
+
+| Bump | When | Example | Who |
+|------|------|---------|-----|
+| **PATCH** (`x.y.Z`) | Bug fixes, small improvements, minor tweaks | `1.0.0` → `1.0.1` | Every release |
+| **MINOR** (`x.Y.0`) | New features, significant changes, new endpoints | `1.0.3` → `1.1.0` | Feature releases |
+| **MAJOR** (`X.0.0`) | Breaking changes, major architecture rework | `1.4.2` → `2.0.0` | Manual decision only |
+
+Every release **must** increment the version. No two releases share the same version number.
+
 ### Version bump checklist
 
-1. Update `VERSION` file
-2. Update the version badge in `README.md`
-3. Run `./scripts/build-release.sh --push`
-4. Tag the git commit: `git tag v<version> && git push --tags`
+1. Bump the version in `VERSION` file (patch, minor, or major as appropriate)
+2. Update the version badge in `README.md` (`version-X.Y.Z-green`)
+3. Commit: `git commit -am "chore: bump version to X.Y.Z"`
+4. Build and push: `./scripts/build-release.sh --push`
+5. Tag the commit: `git tag vX.Y.Z && git push --tags`
 
 ## Project Structure Quick Reference
 

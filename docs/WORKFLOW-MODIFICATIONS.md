@@ -211,6 +211,61 @@ docs: update MANIFESTE.md with new autoscale keys
 refactor(backend): extract notification persistence to core module
 ```
 
+## Release Workflow
+
+### Prerequisites (once)
+
+1. **Create a GitHub Personal Access Token** with `write:packages` scope at [github.com/settings/tokens](https://github.com/settings/tokens).
+2. **Authenticate to GHCR**:
+
+```bash
+echo "GITHUB_TOKEN" | docker login ghcr.io -u Arcneell --password-stdin
+```
+
+3. **Set the package visibility** after the first push: GitHub repo > Settings > Packages > `sork` > change to Public (or configure access for your users).
+
+### Build and publish
+
+```bash
+# Build the distribution image locally (test)
+./scripts/build-release.sh
+
+# Build and push to GHCR (:latest + :version from VERSION file)
+./scripts/build-release.sh --push
+
+# Build with a custom tag (e.g. beta, rc1)
+./scripts/build-release.sh --push --tag beta
+```
+
+The build script:
+
+1. Builds the multi-stage Docker image from the root `Dockerfile`
+2. Compiles Python backend to `.pyc` bytecode (removes `.py` source)
+3. Bundles the minified Vue frontend
+4. Embeds the Bash engine at `/opt/sork/` for host extraction
+5. Verifies no `.py` source leaked into the image
+6. Tags as `:latest` and `:<version>` (from `VERSION` file)
+7. Pushes to `ghcr.io/arcneell/sork` (if `--push`)
+
+### End-user installation
+
+On a fresh server, users run:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Arcneell/SORK/master/scripts/install.sh | bash -s -- --with-systemd
+```
+
+This pulls the image, extracts the engine to `/opt/sork/`, creates configuration files, and starts the systemd service. The web console is then available at `http://<server-ip>:18100`.
+
+See [Installation](getting-started/installation.md) for all options.
+
+### Version bump checklist
+
+1. Update `VERSION` file
+2. Update the version badge in `README.md`
+3. Run `./scripts/build-release.sh --push`
+4. Tag the git commit: `git tag v<version> && git push --tags`
+
 ## Project Structure Quick Reference
 
 | Path                     | What to edit                                       |
@@ -228,4 +283,8 @@ refactor(backend): extract notification persistence to core module
 | `etc/manifest.ini.example`| Reference manifest (committed)                   |
 | `etc/notify.ini.example` | Reference notification config (committed)          |
 | `docs/`                  | Documentation                                      |
+| `Dockerfile`             | Distribution image build (compiled Python, no source)|
+| `scripts/install.sh`     | End-user installer (pull image, extract, configure)  |
+| `scripts/build-release.sh`| Build and push distribution image to GHCR          |
 | `scripts/`               | Utility scripts (deploy, check, install)           |
+| `etc/manifest.ini.dist`  | Distribution manifest template (registry image)    |

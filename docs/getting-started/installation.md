@@ -1,66 +1,90 @@
 # Installation
 
-## Prérequis
+## Installation rapide (recommandée)
 
-| Dépendance | Version minimale | Usage |
-|---|---|---|
-| **Bash** | 5.0+ | Moteur de réconciliation |
-| **Docker** ou **Podman** | 20.10+ / 4.0+ | Runtime conteneur |
-| **curl** | 7.0+ | Health checks HTTP |
-| **python3** | 3.11+ | Validation manifest, audit, backend UI |
-| **socat** | 1.7+ | Reverse-proxy TCP (optionnel, pour autoscale) |
-| **Node.js** | 20+ | Build du frontend (optionnel, pour la console web) |
-
-## Installation automatique
-
-Le script `install-all.sh` gère tout :
+Installez SORK sur n'importe quel serveur Linux avec une seule commande :
 
 ```bash
-git clone https://github.com/Arcneell/SORK.git
-cd shell-orchestrator
-./scripts/install-all.sh
+curl -fsSL https://raw.githubusercontent.com/Arcneell/SORK/master/scripts/install.sh | bash
 ```
 
-### Options disponibles
+Avec le service systemd :
 
 ```bash
-./scripts/install-all.sh [OPTIONS]
-
-Options :
-  --dry-run         Affiche les actions sans les exécuter
-  --with-systemd    Installe le service systemd
-  --skip-build      Ne rebuild pas les images Docker
-  --skip-sork-once  Ne lance pas la première réconciliation
+curl -fsSL https://raw.githubusercontent.com/Arcneell/SORK/master/scripts/install.sh | bash -s -- --with-systemd
 ```
 
 ### Ce que fait le script
 
 1. Vérifie et installe Docker si absent
-2. Installe les paquets de base (`curl`, `python3`)
-3. Build les images de l'orchestrateur et de l'UI
-4. Crée les fichiers de configuration à partir des exemples
+2. Télécharge l'image SORK depuis le registry
+3. Extrait le moteur d'orchestration dans `/opt/sork/`
+4. Crée les fichiers de configuration par défaut
 5. Lance une première réconciliation (`sork once`)
 6. Installe le service systemd (si `--with-systemd`)
 
-## Installation manuelle
+### Prérequis
 
-### 1. Cloner le projet
+| Dépendance | Version minimale | Installé automatiquement |
+|---|---|---|
+| **Docker** | 20.10+ | Oui |
+| **Bash** | 4.0+ | Non (présent sur la plupart des systèmes) |
+| **curl** | 7.0+ | Oui |
+| **socat** | 1.7+ | Non (optionnel, pour autoscale) |
+
+!!! note "Python non requis"
+    Contrairement à l'installation depuis les sources, l'installation par image ne nécessite **pas** Python ni Node.js sur l'hôte. Le backend Python est compilé et embarqué dans l'image Docker.
+
+### Options d'installation
 
 ```bash
-git clone https://github.com/Arcneell/SORK.git
-cd shell-orchestrator
+install.sh [options]
+
+  --root PATH            Répertoire d'installation (défaut : /opt/sork)
+  --image IMAGE          Image Docker (défaut : ghcr.io/arcneell/sork:latest)
+  --with-systemd         Installe et active le service systemd
+  --no-install-docker    N'installe pas Docker (échoue s'il est absent)
+  --skip-engine          Ne pas extraire le moteur (seulement l'image UI)
+  --skip-pull            Ne pas pull l'image (utilise l'image locale)
+  --dry-run              Affiche les actions sans les exécuter
 ```
 
-### 2. Créer la configuration
+### Variables d'environnement
 
 ```bash
-cp etc/manifest.ini.example etc/manifest.ini
-cp etc/notify.ini.example etc/notify.ini
+SORK_IMAGE="ghcr.io/arcneell/sork:latest"   # Image à utiliser
+SORK_ROOT="/opt/sork"                         # Répertoire d'installation
 ```
 
-### 3. Éditer le manifest
+## Arborescence après installation
 
-Ajoutez vos services dans `etc/manifest.ini` :
+```
+/opt/sork/
+├── bin/sork                  # CLI de l'orchestrateur
+├── lib/                      # Modules du moteur
+│   ├── common.sh
+│   ├── manifest.sh
+│   ├── health.sh
+│   ├── repair.sh
+│   ├── ...
+│   ├── audit_log.py
+│   └── manifest_doctor.py
+├── etc/
+│   ├── manifest.ini          # Configuration des services
+│   └── notify.ini            # Configuration des notifications
+├── .sork/                    # Données runtime
+│   ├── state/
+│   ├── incidents/
+│   ├── audit/
+│   └── logs/
+└── VERSION
+```
+
+## Configuration post-installation
+
+### Éditer le manifest
+
+Ajoutez vos services dans `/opt/sork/etc/manifest.ini` :
 
 ```ini
 [orchestrator]
@@ -73,56 +97,106 @@ image = nginx:latest
 publish = 8080:80
 health_type = http
 health_url = http://127.0.0.1:8080/
+repair_strategy = auto
 ```
 
-### 4. Valider la configuration
+### Valider la configuration
 
 ```bash
-bin/sork validate
-bin/sork doctor
+sork validate
+sork doctor
 ```
 
-### 5. Lancer l'orchestrateur
+### Configurer les notifications
+
+Éditez `/opt/sork/etc/notify.ini` pour activer les alertes Discord, Slack, Teams, Telegram ou SMTP.
+
+## Service systemd
+
+Si vous n'avez pas utilisé `--with-systemd` lors de l'installation :
 
 ```bash
-# Un seul passage
-bin/sork once
+# Relancer l'installeur avec l'option
+install.sh --with-systemd --skip-pull --skip-engine
 
-# Mode daemon (boucle infinie)
-bin/sork run
-```
+# Ou installer manuellement
+sudo tee /etc/systemd/system/sork.service <<EOF
+[Unit]
+Description=SORK orchestrateur (mode run)
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
 
-## Installation systemd
+[Service]
+Type=simple
+User=$(whoami)
+WorkingDirectory=/opt/sork
+Environment=SORK_MANIFEST=/opt/sork/etc/manifest.ini
+Environment=SORK_NOTIFY_CONF=/opt/sork/etc/notify.ini
+Environment=SORK_HOME=/opt/sork
+ExecStart=/opt/sork/bin/sork run
+Restart=always
+RestartSec=3
 
-Pour un fonctionnement en tant que service :
+[Install]
+WantedBy=multi-user.target
+EOF
 
-```bash
-sudo cp sork.global.service /etc/systemd/system/sork.service
 sudo systemctl daemon-reload
-sudo systemctl enable sork
-sudo systemctl start sork
+sudo systemctl enable --now sork
 ```
 
-!!! warning "Utilisateur de service"
-    Le service systemd s'exécute par défaut avec l'utilisateur `deploy`. Adaptez `User=` et `Group=` dans le fichier unit si nécessaire.
+## Mise à jour
 
-Le fichier unit configure :
-
-- **WorkingDirectory** : `/opt/shell-orchestrator`
-- **Variables** : `SORK_MANIFEST` et `SORK_NOTIFY_CONF` pointant vers `/opt/shell-orchestrator/etc/`
-- **Redémarrage automatique** : `Restart=always` avec un délai de 3 secondes
-- **Dépendances** : Démarre après Docker et le réseau
-
-## Installation de la console web
+Pour mettre à jour SORK vers la dernière version :
 
 ```bash
-# Build et déploiement de l'UI
-./scripts/deploy-ui.sh
+# Pull la nouvelle image
+docker pull ghcr.io/arcneell/sork:latest
+
+# Réextraire le moteur
+install.sh --skip-pull
+
+# Ou en une commande
+install.sh
 ```
 
-L'image Docker de l'UI est un build multi-stage :
+Le service systemd redémarrera automatiquement. L'UI sera recréée au prochain cycle de réconciliation.
 
-1. **Stage 1** : Node 20 Alpine — build du frontend Vue 3
-2. **Stage 2** : Python 3.12 Alpine — runtime FastAPI + assets statiques
+## Console web
 
-L'UI est accessible sur le port `8080` par défaut.
+Après installation, la console web est accessible sur **http://127.0.0.1:18100**.
+
+- Login par défaut : `admin` / `admin` (changement forcé à la première connexion)
+- Pour exposer sur le LAN, changez `publish` dans le manifest :
+
+```ini
+[sork-ui]
+publish = 0.0.0.0:18100:8080
+```
+
+Puis incrémentez `config_version` et attendez le prochain cycle de réconciliation (ou lancez `sork once`).
+
+---
+
+## Installation depuis les sources (développeurs)
+
+Pour contribuer au projet ou modifier le code :
+
+### Prérequis supplémentaires
+
+| Dépendance | Version minimale | Usage |
+|---|---|---|
+| **Python 3** | 3.11+ | Backend UI, validation manifest, audit |
+| **Node.js** | 20+ | Build du frontend Vue 3 |
+| **ShellCheck** | — | Linting des scripts bash |
+
+### Procédure
+
+```bash
+git clone https://github.com/Arcneell/SORK.git
+cd shell-orchestrator
+./scripts/install-all.sh
+```
+
+Voir [WORKFLOW-MODIFICATIONS.md](../WORKFLOW-MODIFICATIONS.md) pour le workflow de développement complet.

@@ -60,6 +60,7 @@ plugins:
             Démarrage: Getting Started
             Installation: Installation
             Premier lancement: Quick Start
+            Distribution & Release: Distribution & Release
             Déploiement de la doc: Deploy Documentation
             Architecture: Architecture
             Vue d'ensemble: Overview
@@ -127,6 +128,7 @@ nav:
   - Démarrage:
     - Installation: getting-started/installation.md
     - Premier lancement: getting-started/quickstart.md
+    - Distribution & Release: getting-started/distribution.md
     - Déploiement de la doc: getting-started/deploy.md
   - Architecture:
     - Vue d'ensemble: architecture/overview.md

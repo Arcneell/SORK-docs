@@ -108,7 +108,7 @@ shell-orchestrator/
 ├── scripts/                    # Installation et maintenance
 ├── .sork/                      # Données runtime
 ├── sork.global.service         # Unit systemd
-└── VERSION                     # 1.2.0
+└── VERSION                     # 1.3.0
 ```
 
 ---

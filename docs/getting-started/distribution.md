@@ -120,9 +120,9 @@ git push --tags
 ghcr.io/arcneell/sork:<version>
 ├── /app/
 │   ├── app/                  # Backend Python (bytecode .pyc uniquement)
-│   │   ├── __pycache__/      # Modules compilés
-│   │   ├── core/__pycache__/ # Core compilé
-│   │   └── routers/__pycache__/ # Routers compilés
+│   │   ├── main.pyc            # Backend compilé (bytecode sourceless, compileall -b)
+│   │   ├── core/*.pyc          # Modules core compilés
+│   │   └── routers/*.pyc       # Routers compilés
 │   └── static/               # Frontend Vue (JS/CSS minifié)
 └── /opt/sork/                # Moteur (extrait par l'installeur)
     ├── bin/sork

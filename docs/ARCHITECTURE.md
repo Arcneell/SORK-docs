@@ -1,6 +1,6 @@
 # SORK Architecture
 
-SORK (Shell Orchestrator) v1.2.0 -- a single-node Docker orchestrator combining a Bash reconciliation engine, a FastAPI backend, and a Vue 3 frontend.
+SORK (Shell Orchestrator) v1.3.0 -- a single-node Docker orchestrator combining a Bash reconciliation engine, a FastAPI backend, and a Vue 3 frontend.
 
 ## Directory Structure
 
@@ -113,7 +113,7 @@ shell-orchestrator/
     apache-showcase/       # Example Apache service
     autoscale-web/         # Example autoscale-enabled web service
   docs/                    # This documentation directory
-  VERSION                  # Version file (1.2.0)
+  VERSION                  # Version file (1.3.0)
   LICENSE
   README.md
   sork.global.service      # systemd unit file

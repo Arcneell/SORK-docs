@@ -168,23 +168,6 @@ Documenter dans les notes de release toute **nouvelle clé manifeste** à ajoute
 
 ---
 
-## VM Multipass de test (local)
-
-Une VM Ubuntu propre simule un serveur client :
-
-```bash
-export GHCR_TOKEN="ghp_..."   # PAT read:packages
-./scripts/test-package-vm.sh --version 1.3.0
-```
-
-La VM **`sork-pkg-test`** est créée automatiquement. Sans `--destroy`, elle reste accessible :
-
-```bash
-multipass shell sork-pkg-test
-multipass info sork-pkg-test    # IP pour http://IP:18100
-multipass delete sork-pkg-test --purge   # nettoyage
-```
-
 ## Dépannage
 
 | Erreur | Cause | Action |

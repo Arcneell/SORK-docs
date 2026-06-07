@@ -128,9 +128,21 @@ Voir [Installation](installation.md) pour toutes les options.
 
 ## Checklist de release
 
+Processus complet : **[Mise à jour du paquet](package-release.md)**.
+
+Résumé :
+
+```bash
+# 1. Créer les notes docs/getting-started/release-notes/vX.Y.Z.md (+ .en.md)
+# 2. Publier (CI — recommandé)
+./scripts/release-package.sh X.Y.Z
+```
+
+Ou manuellement :
+
 1. Mettre à jour le fichier `VERSION`
 2. Mettre à jour le badge version dans `README.md`
-3. Lancer `./scripts/build-release.sh --push`
+3. Lancer `./scripts/build-release.sh --push` (local) **ou** pousser le tag `vX.Y.Z` (CI)
 4. Taguer le commit git :
 
 ```bash

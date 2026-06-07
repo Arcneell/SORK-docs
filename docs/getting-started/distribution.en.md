@@ -127,10 +127,22 @@ See [Installation](installation.en.md) for all options.
 
 ## Release Checklist
 
+Full process: **[Package Update Process](package-release.en.md)**.
+
+Summary:
+
+```bash
+# 1. Create docs/getting-started/release-notes/vX.Y.Z.md (+ .en.md)
+# 2. Publish (CI — recommended)
+./scripts/release-package.sh X.Y.Z
+```
+
+Or manually:
+
 1. Update the `VERSION` file
 2. Update the version badge in `README.md`
-3. Run `./scripts/build-release.sh --push`
-4. Tag the git commit:
+3. Run `./scripts/build-release.sh --push` (local) **or** push tag `vX.Y.Z` (CI)
+4. Tag the commit:
 
 ```bash
 git tag v$(cat VERSION)

@@ -7,8 +7,8 @@ SORK includes a multi-user authentication system based on **SQLite** and **JWT**
 | Component | Technology |
 |-----------|-----------|
 | User storage | SQLite (`/workspace/.sork/auth.db`) |
-| Password hashing | bcrypt (passlib) |
-| Access tokens | JWT HS256 (python-jose) |
+| Password hashing | bcrypt |
+| Access tokens | JWT HS256 (PyJWT) |
 | Signing key | Auto-generated and persisted in `/workspace/.sork/jwt_secret.key` |
 
 ## Roles

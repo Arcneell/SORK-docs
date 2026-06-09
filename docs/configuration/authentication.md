@@ -7,8 +7,8 @@ SORK intègre un système d'authentification multi-utilisateurs basé sur **SQLi
 | Composant | Technologie |
 |-----------|-------------|
 | Stockage utilisateurs | SQLite (`/workspace/.sork/auth.db`) |
-| Hachage mots de passe | bcrypt (passlib) |
-| Tokens d'accès | JWT HS256 (python-jose) |
+| Hachage mots de passe | bcrypt |
+| Tokens d'accès | JWT HS256 (PyJWT) |
 | Clé de signature | Auto-générée et persistée dans `/workspace/.sork/jwt_secret.key` |
 
 ## Rôles

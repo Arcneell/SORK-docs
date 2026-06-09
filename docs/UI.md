@@ -268,6 +268,7 @@ config_version = 2     # increment to trigger reconciliation
 | `SORK_UI_TLS_CERT`     | (empty)     | TLS certificate path for HTTPS                 |
 | `SORK_UI_TLS_KEY`      | (empty)     | TLS private key path for HTTPS                 |
 | `SORK_METRICS_PROTECT` | `0`         | Require auth for `/metrics`                    |
+| `SORK_CORS_ORIGINS`    | (empty)     | Comma-separated allowed CORS origins; empty = same-origin only (no `*` wildcard) |
 | `SORK_LOG_LEVEL`       | `INFO`      | Logging level (DEBUG, INFO, WARNING, ERROR)    |
 
 Pass environment variables via the manifest `env` key (semicolon-separated):

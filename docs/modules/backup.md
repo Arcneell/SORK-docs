@@ -57,7 +57,9 @@ Clés à ajouter dans la section du service dans `manifest.ini` :
 | Clé | Type | Description |
 |---|---|---|
 | `backup_rsync_dest` | string | Destination rsync (ex: `user@host:/backups`) |
-| `backup_rsync_pass` | string | Mot de passe (optionnel, utilise sshpass ou RSYNC_PASSWORD) |
+| `backup_rsync_ssh_key` | string | Chemin d'une clé privée SSH (méthode recommandée : aucun secret en ligne de commande) |
+| `backup_rsync_pass` | string | Mot de passe (optionnel, transmis via `SSHPASS`/`sshpass -e` ou `RSYNC_PASSWORD`, jamais visible dans `ps`) |
+| `backup_rsync_known_hosts` | string | Fichier `known_hosts` épinglé pour une vérification stricte de la clé d'hôte (sinon : trust-on-first-use `accept-new`) |
 | `backup_rsync_opts` | string | Options rsync (défaut : `-az`) |
 
 ### Clés S3

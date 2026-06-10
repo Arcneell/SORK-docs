@@ -6,10 +6,28 @@ SORK intègre un système d'authentification multi-utilisateurs basé sur **SQLi
 
 | Composant | Technologie |
 |-----------|-------------|
-| Stockage utilisateurs | SQLite (`/workspace/.sork/auth.db`) |
+| Stockage utilisateurs | SQLite (`/workspace/.sork/auth.db`), schéma versionné via `PRAGMA user_version` |
 | Hachage mots de passe | bcrypt |
 | Tokens d'accès | JWT HS256 (PyJWT) |
+| Session SPA | Cookie `sork_session` **httpOnly**, `SameSite=strict` |
 | Clé de signature | Auto-générée et persistée dans `/workspace/.sork/jwt_secret.key` |
+
+## Session de la console web (cookie httpOnly)
+
+Pour durcir l'interface contre les attaques XSS, le JWT de session **n'est jamais stocké dans `localStorage`**. À la connexion, le backend pose un cookie httpOnly :
+
+| Attribut | Valeur |
+|----------|--------|
+| Nom | `sork_session` |
+| `HttpOnly` | Oui — inaccessible au JavaScript |
+| `SameSite` | `strict` — bloque les requêtes cross-site (durcissement CSRF) |
+| `Secure` | Activé automatiquement quand la requête arrive en HTTPS (désactivé en HTTP pur pour les déploiements LAN) |
+| `Max-Age` | Identique à la durée de validité du JWT (`SORK_JWT_EXPIRE_MINUTES`, 8 h par défaut) |
+| `Path` | `/` |
+
+La SPA conserve le token en mémoire pour le cycle de vie de l'onglet et s'appuie sur le cookie httpOnly pour ré-authentifier après un rafraîchissement de page (appel à `/api/auth/me`). La déconnexion (`POST /api/auth/logout`) efface le cookie.
+
+Le token est résolu dans cet ordre de priorité par le backend : en-tête `Authorization: Bearer`, puis `X-SORK-Token`, puis le cookie `sork_session`, puis (legacy) le paramètre `?token=`. Les clients CLI/API utilisent donc l'en-tête `Bearer`, la SPA utilise le cookie.
 
 ## Rôles
 
@@ -105,7 +123,9 @@ Tous les événements d'authentification sont tracés dans l'audit :
 | Méthode | Chemin | Rôle requis | Description |
 |---------|--------|-------------|-------------|
 | `GET` | `/api/auth/me` | Tout rôle | Informations de l'utilisateur courant |
-| `POST` | `/api/auth/change-password` | Tout rôle | Changer son mot de passe |
+| `POST` | `/api/auth/change-password` | Tout rôle | Changer son mot de passe (émet un nouveau token + cookie) |
+| `POST` | `/api/auth/logout` | — | Efface le cookie de session (idempotent) |
+| `POST` | `/api/auth/sse-ticket` | Tout rôle | Émet un ticket à usage unique pour ouvrir un flux SSE |
 
 ### Endpoints admin
 
@@ -124,13 +144,31 @@ curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "votre_mot_de_passe"}'
 
-# Réponse
+# Réponse : le token est renvoyé dans le corps (pour les clients CLI/API)
+# ET posé dans un cookie httpOnly `sork_session` (utilisé par la SPA).
 # {"ok": true, "token": "eyJ...", "user": {"username": "admin", "role": "admin"}}
 
-# Utilisation du token
+# Utilisation du token (clients CLI/API)
 curl http://localhost:8080/api/state \
   -H "Authorization: Bearer eyJ..."
 ```
+
+## Authentification des flux SSE (tickets à usage unique)
+
+`EventSource` ne permet pas d'envoyer d'en-têtes personnalisés. Pour éviter de faire transiter le JWT long-terme dans l'URL (où il fuirait dans les logs de proxy et l'historique du navigateur), les flux SSE utilisent des **tickets à usage unique** :
+
+1. Le client authentifié appelle `POST /api/auth/sse-ticket` → reçoit `{"ok": true, "ticket": "..."}`
+2. Il ouvre le flux avec `?ticket=<ticket>` (et non `?token=`)
+3. Le backend consomme le ticket de façon atomique : il est valable **une seule fois** et expire après **30 secondes**
+
+```javascript
+// 1. Obtenir un ticket
+const { ticket } = await (await fetch('/api/auth/sse-ticket', { method: 'POST' })).json()
+// 2. Ouvrir le flux
+const es = new EventSource(`/api/stream?ticket=${encodeURIComponent(ticket)}`)
+```
+
+Le nombre de flux SSE simultanés est limité à 5 par adresse IP.
 
 ## Gestion des utilisateurs (interface)
 

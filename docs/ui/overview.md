@@ -19,12 +19,14 @@ graph LR
 
 | Composant | Technologie | Version |
 |---|---|---|
-| Backend | Python / FastAPI | 3.12+ |
-| Frontend | Vue 3 + TypeScript + Vite | 3.x |
-| Style | Tailwind CSS | 3.x |
+| Backend | Python / FastAPI | 3.11+ |
+| Frontend | Vue 3 + TypeScript | 3.5 / TS 5.9 |
+| Build | Vite | 8.x |
+| Style | Tailwind CSS | 4.x |
 | Icônes | Lucide | — |
-| State management | Pinia | — |
-| Conteneur | Docker multi-stage | Node 20 + Python 3.12 Alpine |
+| State management | Pinia | 3.x |
+| Routing / i18n | Vue Router 4 + Vue I18n 11 | — |
+| Conteneur | Docker multi-stage | Node + Python Alpine |
 
 ---
 
@@ -71,7 +73,9 @@ L'authentification est **obligatoire**. SORK utilise un systeme multi-utilisateu
 
 Au premier lancement, un compte `admin` / `admin` est créé automatiquement. L'interface force le changement du mot de passe par défaut.
 
-### Connexion API
+La **SPA** s'authentifie via un cookie de session **httpOnly** (`sork_session`, `SameSite=strict`) posé à la connexion — le token n'est jamais stocké dans `localStorage`. Les **clients CLI/API** utilisent l'en-tête `Authorization: Bearer`.
+
+### Connexion API (CLI / scripts)
 
 ```bash
 # 1. Obtenir un token JWT
@@ -83,13 +87,9 @@ curl -X POST http://localhost:8080/api/auth/login \
 curl -H "Authorization: Bearer eyJ..." http://localhost:8080/api/containers/
 ```
 
-Pour les flux SSE (EventSource ne supporte pas les headers) :
+Les flux SSE utilisent un **ticket à usage unique** (`EventSource` ne supporte pas les en-têtes) : appeler `POST /api/auth/sse-ticket`, puis ouvrir le flux avec `?ticket=<ticket>`.
 
-```bash
-curl http://localhost:8080/api/stream?token=eyJ...
-```
-
-Voir [Configuration > Authentification](../configuration/authentication.md) pour les details complets (roles, securite, API utilisateurs).
+Voir [Configuration > Authentification](../configuration/authentication.md) pour les détails complets (cookie de session, tickets SSE, rôles, sécurité, API utilisateurs).
 
 ---
 
@@ -179,6 +179,7 @@ Le conteneur UI nécessite deux volumes :
 | `SORK_UI_TLS_CERT` | — | Chemin certificat TLS |
 | `SORK_UI_TLS_KEY` | — | Chemin clé TLS |
 | `SORK_METRICS_PROTECT` | `0` | Protéger /metrics par authentification |
+| `SORK_CORS_ORIGINS` | — | Origines CORS autorisées (CSV). Vide = même origine uniquement (recommandé) |
 | `SORK_UI_VERBOSE` | `0` | Logs HTTP détaillés |
 
 ---

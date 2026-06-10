@@ -179,6 +179,8 @@ Index of all configuration keys available in SORK.
 
 ## Environment Variables
 
+### Engine (Bash)
+
 | Variable | Default | Description |
 |---|---|---|
 | `SORK_MANIFEST` | `etc/manifest.ini` | Manifest path |
@@ -190,3 +192,18 @@ Index of all configuration keys available in SORK.
 | `SORK_STRICT_LOCAL` | `0` | Force localhost health URLs |
 | `SORK_LANG` | `fr` | Orchestrator language (fr, en) |
 | `SORK_HTTP_USER_AGENT` | `Shell-Orchestrator/1.0` | User-Agent for HTTP health checks |
+
+### Web Console (FastAPI backend)
+
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `8080` | Backend listen port |
+| `SORK_UI_BIND` | `0.0.0.0` | Bind address |
+| `SORK_ADMIN_PASSWORD` | `admin` | Initial admin password (only if no users exist) |
+| `SORK_JWT_SECRET` | (auto) | JWT signing key; auto-generated and persisted to `.sork/jwt_secret.key` if unset |
+| `SORK_JWT_EXPIRE_MINUTES` | `480` | JWT token / session cookie lifetime (minutes) |
+| `SORK_CORS_ORIGINS` | — | Allowed CORS origins (CSV). Empty = same-origin only (recommended) |
+| `SORK_METRICS_PROTECT` | `0` | Require authentication on `/metrics` |
+| `SORK_UI_TLS_CERT` | — | TLS certificate path (HTTPS) |
+| `SORK_UI_TLS_KEY` | — | TLS key path (HTTPS) |
+| `SORK_UI_TOKEN` | — | Legacy shared token. **Deprecated** — migrate to user accounts |

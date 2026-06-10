@@ -1,6 +1,6 @@
 # API REST
 
-Le backend FastAPI expose environ 120 endpoints REST organisés par catégorie.
+Le backend FastAPI expose plus de 150 endpoints REST, répartis sur 21 routers et organisés par catégorie.
 
 ---
 
@@ -10,7 +10,7 @@ Le backend FastAPI expose environ 120 endpoints REST organisés par catégorie.
 Base : http://localhost:8080/api
 ```
 
-L'authentification est obligatoire. Obtenir un token JWT via `/api/auth/login`, puis l'inclure dans chaque requête :
+L'authentification est obligatoire. Les clients CLI/API obtiennent un token JWT via `/api/auth/login`, puis l'incluent dans chaque requête via l'en-tête `Authorization: Bearer`. (La SPA, elle, s'authentifie via le cookie httpOnly `sork_session` posé à la connexion — voir [Authentification](../configuration/authentication.md).)
 
 ```bash
 # Connexion
@@ -21,11 +21,13 @@ TOKEN=$(curl -s -X POST http://localhost:8080/api/auth/login \
 # Utilisation
 curl -H "Authorization: Bearer $TOKEN" http://localhost:8080/api/containers/
 
-# Pour SSE (EventSource ne supporte pas les headers)
-curl http://localhost:8080/api/stream?token=$TOKEN
+# Pour SSE (EventSource ne supporte pas les headers) : obtenir un ticket à usage unique
+TICKET=$(curl -s -X POST -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/auth/sse-ticket | jq -r .ticket)
+curl "http://localhost:8080/api/stream?ticket=$TICKET"
 ```
 
-Voir [Authentification](../configuration/authentication.md) pour les détails.
+Voir [Authentification](../configuration/authentication.md) pour les détails (cookie de session, tickets SSE, rôles).
 
 ---
 
@@ -322,10 +324,11 @@ Voir [Authentification](../configuration/authentication.md) pour les détails.
 
 ## Server-Sent Events (SSE)
 
-Les flux SSE permettent des mises à jour temps réel sans polling :
+Les flux SSE permettent des mises à jour temps réel sans polling. L'authentification se fait via un **ticket à usage unique** (`POST /api/auth/sse-ticket`, valable une fois, 30 s) passé en paramètre `?ticket=` — jamais le JWT directement :
 
 ```javascript
-const evtSource = new EventSource('/api/stream?token=MON_TOKEN');
+const { ticket } = await (await fetch('/api/auth/sse-ticket', { method: 'POST' })).json();
+const evtSource = new EventSource(`/api/stream?ticket=${encodeURIComponent(ticket)}`);
 evtSource.onmessage = (event) => {
   const state = JSON.parse(event.data);
   // Mettre à jour l'interface

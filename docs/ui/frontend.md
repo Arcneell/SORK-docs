@@ -4,14 +4,17 @@ Le frontend SORK est une Single Page Application (SPA) construite avec Vue 3 et 
 
 ## Stack
 
-| Outil | Rôle |
-|---|---|
-| **Vue 3** | Framework réactif |
-| **TypeScript** | Typage statique |
-| **Vite** | Build tool & dev server |
-| **Tailwind CSS** | Styles utilitaires |
-| **Lucide** | Icônes |
-| **Vue Router** | Navigation SPA |
+| Outil | Version | Rôle |
+|---|---|---|
+| **Vue 3** | 3.5 | Framework réactif (Composition API, `<script setup>`) |
+| **TypeScript** | 5.9 | Typage statique (build `vue-tsc -b`, réponses API typées dans `src/types/`) |
+| **Vite** | 8.x | Build tool & dev server |
+| **Tailwind CSS** | 4.x | Styles utilitaires |
+| **Pinia** | 3.x | State management (`stores/auth.ts`, `stores/app.ts`) |
+| **Vue Router** | 4.x | Navigation SPA (mode hash `#/`) + guards |
+| **Vue I18n** | 11.x | Internationalisation FR/EN |
+| **Lucide** | — | Icônes |
+| **Vitest** | 4.x | Tests unitaires (jsdom + Vue Test Utils) |
 
 ## Structure des vues
 
@@ -82,7 +85,22 @@ Visionneuse centralisée :
 | `WizardModal` | Assistant multi-étapes |
 | `ArrayField` | Champ de formulaire pour les listes (ports, volumes, env) |
 | `ContainerWizard` | Formulaire complet de création de conteneur |
-| `ServiceAssistant` | Assistant guidé de création multi-conteneurs avec pré-remplissage automatique |
+| `ServiceAssistant` | Assistant guidé de création multi-conteneurs, découpé en étapes (`ServiceAssistantImageStep`, `…ContainerStep`, `…OrchestratorStep`, `…SummaryStep`) |
+| `StackAssistant` | Assistant de déploiement de stacks applicatives (templates) |
+| `UsersSettingsPanel` / `WebhooksSettingsPanel` / `BackupSettingsPanel` / `RegistriesSettingsPanel` | Panneaux extraits de `SettingsView` |
+
+!!! note "Découpage des gros composants"
+    Les deux assistants `ServiceAssistant` et `StackAssistant` (~1600 lignes chacun à l'origine) ont été découpés en sous-composants d'étape, et `SettingsView` en panneaux dédiés, pour améliorer la lisibilité et la testabilité.
+
+## Authentification et état
+
+- **Session SPA** : aucun token n'est stocké dans `localStorage`. Le JWT est gardé en mémoire pour la durée de l'onglet (`stores/auth.ts`), et le cookie httpOnly `sork_session` permet de ré-authentifier après un rafraîchissement via `/api/auth/me`.
+- **Requêtes** : le client (`src/api/client.ts`) ajoute l'en-tête `Authorization: Bearer` si un token est en mémoire ; le cookie est envoyé automatiquement par le navigateur.
+- **Flux SSE** : `src/api/sse.ts` échange d'abord le JWT contre un ticket à usage unique (`/api/auth/sse-ticket`) puis ouvre l'`EventSource` avec `?ticket=`, avec reconnexion automatique.
+
+## Tests
+
+Les tests unitaires (`src/__tests__/`, ~80 cas avec Vitest) couvrent les stores Pinia, les guards du routeur, le client API (gestion 401/429/timeout, token jamais persisté), les utilitaires et les composants partagés (`DataTable`, `StatusBadge`, `ConfirmModal`, `ArrayField`, `DeployProgress`, `WebhookNotificationCard`). Lancer avec `npm run test`.
 
 ## Build de production
 

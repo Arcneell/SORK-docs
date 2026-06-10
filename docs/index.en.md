@@ -21,7 +21,7 @@ SORK is a declarative orchestrator for Docker containers on a single server. Ser
 - Horizontal autoscaling with built-in TCP load balancer (socat)
 - Discord alerts with detailed diagnostics
 - Audit trail in JSONL or SQLite
-- Web console: Vue 3 + FastAPI (~120 REST endpoints)
+- Web console: Vue 3 + FastAPI (150+ REST endpoints, httpOnly cookie auth)
 
 ---
 
@@ -83,8 +83,8 @@ graph LR
 
 ```
 shell-orchestrator/
-├── bin/sork                    # CLI (8 commands)
-├── lib/                        # Engine (173 functions)
+├── bin/sork                    # CLI (9 commands)
+├── lib/                        # Bash engine
 │   ├── common.sh               #   Logging, state management, port allocation
 │   ├── manifest.sh             #   INI parser
 │   ├── runtime.sh              #   Docker/Podman abstraction
@@ -102,7 +102,7 @@ shell-orchestrator/
 │   ├── manifest.ini            #   Declared services
 │   └── notify.ini              #   Discord webhook
 ├── ui/                         # Web console
-│   ├── backend/                #   FastAPI (~120 endpoints)
+│   ├── backend/                #   FastAPI (21 routers, 150+ endpoints)
 │   ├── frontend/               #   Vue 3 SPA
 │   └── Dockerfile              #   Multi-stage build
 ├── scripts/                    # Installation and maintenance
@@ -147,4 +147,4 @@ shell-orchestrator/
 | [Configuration](configuration/manifest.md) | INI manifest, Discord notifications, environment variables |
 | [Modules](modules/health.md) | Health, repair, autoscale, proxy, audit, incidents, notifications |
 | [Web Console](ui/overview.md) | UI, REST API, frontend |
-| [Reference](reference/cli.md) | CLI, exhaustive configuration, 173 internal functions, troubleshooting |
+| [Reference](reference/cli.md) | CLI, exhaustive configuration, internal functions, troubleshooting |

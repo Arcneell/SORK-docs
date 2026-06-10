@@ -92,6 +92,8 @@ plugins:
             Configuration complète: Full Configuration
             Fonctions internes: Internal Functions
             Dépannage: Troubleshooting
+            Développement: Development
+            Workflow de modification: Modification Workflow
 
 markdown_extensions:
   - admonition
@@ -162,3 +164,5 @@ nav:
     - Configuration complète: reference/configuration.md
     - Fonctions internes: reference/functions.md
     - Dépannage: reference/troubleshooting.md
+  - Développement:
+    - Workflow de modification: WORKFLOW-MODIFICATIONS.md

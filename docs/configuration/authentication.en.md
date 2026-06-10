@@ -6,10 +6,28 @@ SORK includes a multi-user authentication system based on **SQLite** and **JWT**
 
 | Component | Technology |
 |-----------|-----------|
-| User storage | SQLite (`/workspace/.sork/auth.db`) |
+| User storage | SQLite (`/workspace/.sork/auth.db`), schema versioned via `PRAGMA user_version` |
 | Password hashing | bcrypt |
 | Access tokens | JWT HS256 (PyJWT) |
+| SPA session | `sork_session` cookie, **httpOnly**, `SameSite=strict` |
 | Signing key | Auto-generated and persisted in `/workspace/.sork/jwt_secret.key` |
+
+## Web console session (httpOnly cookie)
+
+To harden the interface against XSS, the session JWT is **never stored in `localStorage`**. On login, the backend sets an httpOnly cookie:
+
+| Attribute | Value |
+|-----------|-------|
+| Name | `sork_session` |
+| `HttpOnly` | Yes — not readable from JavaScript |
+| `SameSite` | `strict` — blocks cross-site requests (CSRF hardening) |
+| `Secure` | Enabled automatically when the request arrives over HTTPS (off for plain HTTP / LAN deployments) |
+| `Max-Age` | Same as the JWT lifetime (`SORK_JWT_EXPIRE_MINUTES`, 8 h by default) |
+| `Path` | `/` |
+
+The SPA keeps the token in memory for the tab's lifetime and relies on the httpOnly cookie to re-authenticate after a page refresh (call to `/api/auth/me`). Logging out (`POST /api/auth/logout`) clears the cookie.
+
+The backend resolves the token in this priority order: `Authorization: Bearer` header, then `X-SORK-Token`, then the `sork_session` cookie, then (legacy) the `?token=` query parameter. CLI/API clients therefore use the `Bearer` header while the SPA uses the cookie.
 
 ## Roles
 
@@ -105,7 +123,9 @@ All authentication events are tracked in the audit log:
 | Method | Path | Required Role | Description |
 |--------|------|---------------|-------------|
 | `GET` | `/api/auth/me` | Any role | Current user information |
-| `POST` | `/api/auth/change-password` | Any role | Change own password |
+| `POST` | `/api/auth/change-password` | Any role | Change own password (issues a new token + cookie) |
+| `POST` | `/api/auth/logout` | — | Clears the session cookie (idempotent) |
+| `POST` | `/api/auth/sse-ticket` | Any role | Issues a single-use ticket to open an SSE stream |
 
 ### Admin Endpoints
 
@@ -124,13 +144,31 @@ curl -X POST http://localhost:8080/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{"username": "admin", "password": "your_password"}'
 
-# Response
+# Response: the token is returned in the body (for CLI/API clients)
+# AND set in an httpOnly `sork_session` cookie (used by the SPA).
 # {"ok": true, "token": "eyJ...", "user": {"username": "admin", "role": "admin"}}
 
-# Using the token
+# Using the token (CLI/API clients)
 curl http://localhost:8080/api/state \
   -H "Authorization: Bearer eyJ..."
 ```
+
+## SSE stream authentication (single-use tickets)
+
+`EventSource` cannot send custom headers. To avoid passing the long-lived JWT in the URL (where it would leak into proxy logs and browser history), SSE streams use **single-use tickets**:
+
+1. The authenticated client calls `POST /api/auth/sse-ticket` → receives `{"ok": true, "ticket": "..."}`
+2. It opens the stream with `?ticket=<ticket>` (not `?token=`)
+3. The backend consumes the ticket atomically: it is valid **once** and expires after **30 seconds**
+
+```javascript
+// 1. Get a ticket
+const { ticket } = await (await fetch('/api/auth/sse-ticket', { method: 'POST' })).json()
+// 2. Open the stream
+const es = new EventSource(`/api/stream?ticket=${encodeURIComponent(ticket)}`)
+```
+
+The number of concurrent SSE streams is capped at 5 per IP address.
 
 ## User Management (UI)
 

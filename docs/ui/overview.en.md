@@ -19,12 +19,14 @@ graph LR
 
 | Component | Technology | Version |
 |---|---|---|
-| Backend | Python / FastAPI | 3.12+ |
-| Frontend | Vue 3 + TypeScript + Vite | 3.x |
-| Styling | Tailwind CSS | 3.x |
+| Backend | Python / FastAPI | 3.11+ |
+| Frontend | Vue 3 + TypeScript | 3.5 / TS 5.9 |
+| Build | Vite | 8.x |
+| Styling | Tailwind CSS | 4.x |
 | Icons | Lucide | — |
-| State management | Pinia | — |
-| Container | Docker multi-stage | Node 20 + Python 3.12 Alpine |
+| State management | Pinia | 3.x |
+| Routing / i18n | Vue Router 4 + Vue I18n 11 | — |
+| Container | Docker multi-stage | Node + Python Alpine |
 
 ---
 
@@ -71,7 +73,9 @@ Authentication is **mandatory**. SORK uses a multi-user system with JWT and two 
 
 On first launch, an `admin` / `admin` account is automatically created. The interface forces a password change for the default account.
 
-### API Login
+The **SPA** authenticates via an **httpOnly** session cookie (`sork_session`, `SameSite=strict`) set at login — the token is never stored in `localStorage`. **CLI/API clients** use the `Authorization: Bearer` header.
+
+### API Login (CLI / scripts)
 
 ```bash
 # 1. Get a JWT token
@@ -83,13 +87,9 @@ curl -X POST http://localhost:8080/api/auth/login \
 curl -H "Authorization: Bearer eyJ..." http://localhost:8080/api/containers/
 ```
 
-For SSE streams (EventSource cannot set headers):
+SSE streams use a **single-use ticket** (`EventSource` cannot set headers): call `POST /api/auth/sse-ticket`, then open the stream with `?ticket=<ticket>`.
 
-```bash
-curl http://localhost:8080/api/stream?token=eyJ...
-```
-
-See [Configuration > Authentication](../configuration/authentication.en.md) for full details (roles, security, user API).
+See [Configuration > Authentication](../configuration/authentication.en.md) for full details (session cookie, SSE tickets, roles, security, user API).
 
 ---
 
@@ -179,6 +179,7 @@ The UI container requires two volumes:
 | `SORK_UI_TLS_CERT` | — | TLS certificate path |
 | `SORK_UI_TLS_KEY` | — | TLS key path |
 | `SORK_METRICS_PROTECT` | `0` | Protect /metrics with authentication |
+| `SORK_CORS_ORIGINS` | — | Allowed CORS origins (CSV). Empty = same-origin only (recommended) |
 | `SORK_UI_VERBOSE` | `0` | Detailed HTTP logs |
 
 ---

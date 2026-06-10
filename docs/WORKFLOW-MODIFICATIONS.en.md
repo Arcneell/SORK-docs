@@ -207,7 +207,7 @@ Examples:
 ```
 feat(autoscale): add http_error_rate metric support
 fix(engine): prevent reconciliation loop on manual stop
-docs: update MANIFESTE.md with new autoscale keys
+docs: update configuration/manifest.md with new autoscale keys
 refactor(backend): extract notification persistence to core module
 ```
 

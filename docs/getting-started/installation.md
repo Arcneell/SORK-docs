@@ -41,6 +41,10 @@ docker run --rm ghcr.io/arcneell/caelix:latest cat /opt/caelix/install.sh | bash
 ```bash
 install.sh [options]
 
+  --ui-port PORT         Port d'écoute de la console web (défaut : 18100)
+  --ui-bind ADDR         Adresse d'écoute de l'UI (défaut : 0.0.0.0 ;
+                         127.0.0.1 = machine locale uniquement)
+  --lang fr|en           Langue CLI / notifications (défaut : fr)
   --root PATH            Répertoire d'installation (défaut : /opt/caelix)
   --image IMAGE          Image Docker (défaut : ghcr.io/arcneell/caelix:latest)
   --with-systemd         Installe et active le service systemd
@@ -49,6 +53,22 @@ install.sh [options]
   --skip-pull            Ne pas pull l'image (utilise l'image locale)
   --dry-run              Affiche les actions sans les exécuter
 ```
+
+Exemples :
+
+```bash
+# Port UI personnalisé
+... | bash -s -- --with-systemd --ui-port 9000
+
+# UI accessible uniquement en local
+... | bash -s -- --with-systemd --ui-bind 127.0.0.1
+
+# Installation dans le home avec port custom (l'unité systemd s'adapte)
+... | bash -s -- --with-systemd --root ~/caelix --ui-port 8088
+```
+
+Toutes les options ont un équivalent en variable d'environnement :
+`CAELIX_UI_PORT`, `CAELIX_UI_BIND`, `CAELIX_LANG`, `CAELIX_ROOT`, `CAELIX_IMAGE`.
 
 ### Variables d'environnement
 
@@ -168,18 +188,19 @@ Le conteneur UI sera recréé au prochain cycle de réconciliation avec la nouve
 
 ## Console web
 
-Après installation, la console web est accessible sur **http://IP_DU_SERVEUR:18100**.
+Après installation, la console web est accessible sur **http://IP_DU_SERVEUR:&lt;port&gt;** (port `18100` par défaut).
 
 - Login par défaut : `admin` / `admin` (changement forcé à la première connexion)
-- Par défaut, l'UI écoute sur toutes les interfaces (`0.0.0.0:18100`).
-- Pour restreindre à l'accès local uniquement, changez `publish` dans le manifest :
+- **Le port et l'adresse d'écoute se choisissent à l'installation** : `--ui-port <PORT>` et `--ui-bind <ADDR>` (voir [Options d'installation](#options-dinstallation)).
+- Par défaut, l'UI écoute sur toutes les interfaces (`0.0.0.0`). Pour la restreindre à l'accès local, installez avec `--ui-bind 127.0.0.1`.
+
+Pour changer le port **après coup**, éditez `publish` (et `health_url`) dans le manifest, incrémentez `config_version`, puis lancez `caelix once` :
 
 ```ini
 [caelix-ui]
-publish = 127.0.0.1:18100:8080
+publish = 127.0.0.1:9000:8080
+health_url = http://127.0.0.1:9000/api/ping
 ```
-
-Puis incrémentez `config_version` et lancez `caelix once`.
 
 ---
 
